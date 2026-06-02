@@ -2,24 +2,40 @@ from langchain_core.messages import HumanMessage
 from app.graph.builder import chatbot
 
 import uuid
-CONFIG = {"configurable": {"thread_id": str(uuid.uuid4())}}
 
-print("Type your message and press Enter. Type 'quit' or 'exit' to stop.")
+
+CONFIG = {
+    "configurable": {
+        "thread_id": str(uuid.uuid4())
+    }
+}
+
+
+print("Type your message and press Enter.")
+print("Type 'quit' or 'exit' to stop.\n")
+
 
 while True:
+
     user_text = input("You: ").strip()
+
     if user_text.lower() in {"quit", "exit", "q"}:
         print("Goodbye!")
         break
 
-    response = chatbot.invoke(
+    print("AI: ", end="", flush=True)
+
+    for message_chunk, metadata in chatbot.stream(
         {
             "messages": [
                 HumanMessage(content=user_text)
             ]
         },
-        config=CONFIG
-    )
+        config=CONFIG,
+        stream_mode="messages"
+    ):
 
-    ai_response = response["messages"][-1].content
-    print(f"AI: {ai_response}")
+        if message_chunk.content:
+            print(message_chunk.content, end="", flush=True)
+
+    print("\n")
