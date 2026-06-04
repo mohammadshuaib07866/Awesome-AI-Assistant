@@ -4,6 +4,7 @@ import uuid
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from app.graph.builder import chatbot
 from app.graph.builder import retrieve_all_threads
+from app.rag import get_rag_document_count, reload_rag_data, save_uploaded_pdfs
 
 # ==============================
 # Generate Thread ID
@@ -103,6 +104,39 @@ with st.sidebar:
         reset_chat()
 
         st.rerun()
+
+    st.divider()
+
+    st.subheader("RAG Documents")
+
+    uploaded_files = st.file_uploader(
+        "Upload PDF document(s) for RAG",
+        type=["pdf"],
+        accept_multiple_files=True,
+    )
+
+    if uploaded_files:
+        try:
+            saved_paths = save_uploaded_pdfs(uploaded_files)
+            message = reload_rag_data()
+            st.success(
+                f"Uploaded {len(saved_paths)} PDF file(s) and reloaded the RAG corpus."
+            )
+        except Exception as err:
+            st.error(f"Upload failed: {err}")
+
+    try:
+        document_count = get_rag_document_count()
+        st.write(f"Loaded {document_count} PDF document(s) for retrieval.")
+    except Exception as err:
+        st.error(f"RAG init error: {err}")
+
+    if st.button("🔄 Reload RAG documents"):
+        try:
+            message = reload_rag_data()
+            st.success(message)
+        except Exception as err:
+            st.error(f"Reload failed: {err}")
 
     st.divider()
 

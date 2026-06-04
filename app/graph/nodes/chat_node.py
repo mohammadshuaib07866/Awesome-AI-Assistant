@@ -1,5 +1,6 @@
 from app.graph.state import ChatbotState
 from app.llms.openai_model import ChatOpenAIModel
+from app.rag import rag_tool
 from app.tools.tools import calculator, search_tool
 import langgraph.prebuilt.tool_node as tool_node_module
 from langgraph.prebuilt import ToolNode
@@ -11,7 +12,7 @@ tool_node_module.Runtime = Runtime
 
 model = ChatOpenAIModel.get_model()
 
-all_tools = [calculator, search_tool]
+all_tools = [calculator, search_tool, rag_tool]
 model_with_tools = model.bind_tools(all_tools)
 
 tool_node = ToolNode(all_tools)
